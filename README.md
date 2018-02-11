@@ -24,7 +24,7 @@ HTTP say 200.
 new EventResponse.Response(user).setOK()
 ```
 
-TODO: image
+<img src="https://raw.githubusercontent.com/starhoshi/event-response/master/docs/ok.png" width='70%' />
 
 ## Bad Request
 
@@ -35,7 +35,7 @@ HTTP say 400.
 new EventResponse.Response(user).setBadRequest('error_id', 'error reason')
 ```
 
-TODO: image
+<img src="https://raw.githubusercontent.com/starhoshi/event-response/master/docs/badrequest.png" width='70%' />
 
 ## Inernal Error
 
@@ -46,7 +46,7 @@ HTTP say 400.
 new EventResponse.Response(user).setInternalError('error_id', 'error reason')
 ```
 
-TODO: image
+<img src="https://raw.githubusercontent.com/starhoshi/event-response/master/docs/internal.png" width='70%' />
 
 
 ## Usage
