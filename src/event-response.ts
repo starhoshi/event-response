@@ -27,7 +27,7 @@ export enum Status {
 export interface IResponse {
   status: Status
   id?: string
-  errors?: [{ [key: string]: any }]
+  errors?: any[]
 }
 
 interface IFailure {

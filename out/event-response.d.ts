@@ -11,9 +11,7 @@ export declare enum Status {
 export interface IResponse {
     status: Status;
     id?: string;
-    errors?: [{
-        [key: string]: any;
-    }];
+    errors?: any[];
 }
 export declare class Failure {
     reference: FirebaseFirestore.DocumentReference;

@@ -97,6 +97,6 @@ firebase-debug.log
 sample-cloud-functions/functions/out
 
 # Test
-out/tests
+out/test
 .envrc
 coverage
