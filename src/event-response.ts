@@ -27,7 +27,7 @@ export enum Status {
 export interface IResponse {
   status: Status
   id?: string
-  errors?: any[]
+  error?: any
 }
 
 interface IFailure {
@@ -52,7 +52,7 @@ export class Failure {
   private makeError(response: IResponse) {
     return {
       response: response,
-      createdAt: FirebaseFirestore.FieldValue.serverTimestamp()
+      createdAt: new Date()
     }
   }
 
@@ -122,11 +122,11 @@ export class Response {
     return response
   }
 
-  private async setError(status: Status, id: string, errors?: [{ [key: string]: any }]) {
+  private async setError(status: Status, id: string, error?: any) {
     const response = this.makeResponse(status)
     response.id = id
-    if (errors) {
-      response.errors = errors
+    if (error) {
+      response.error = error
     }
 
     await Promise.all([
@@ -137,12 +137,12 @@ export class Response {
     return response
   }
 
-  async setBadRequest(id: string, errors?: [{ [key: string]: any }]) {
-    return this.setError(Status.BadRequest, id, errors)
+  async setBadRequest(id: string, error?: any) {
+    return this.setError(Status.BadRequest, id, error)
   }
 
-  async setInternalError(id: string, errors?: [{ [key: string]: any }]) {
-    return this.setError(Status.InternalError, id, errors)
+  async setInternalError(id: string, error?: any) {
+    return this.setError(Status.InternalError, id, error)
   }
 }
 

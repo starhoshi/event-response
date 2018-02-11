@@ -32,7 +32,7 @@ class Failure {
     makeError(response) {
         return {
             response: response,
-            createdAt: FirebaseFirestore.FieldValue.serverTimestamp()
+            createdAt: new Date()
         };
     }
     add(response) {
@@ -94,12 +94,12 @@ class Response {
             return response;
         });
     }
-    setError(status, id, errors) {
+    setError(status, id, error) {
         return __awaiter(this, void 0, void 0, function* () {
             const response = this.makeResponse(status);
             response.id = id;
-            if (errors) {
-                response.errors = errors;
+            if (error) {
+                response.error = error;
             }
             yield Promise.all([
                 this.reference.update({ response: response }),
@@ -108,14 +108,14 @@ class Response {
             return response;
         });
     }
-    setBadRequest(id, errors) {
+    setBadRequest(id, error) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.setError(Status.BadRequest, id, errors);
+            return this.setError(Status.BadRequest, id, error);
         });
     }
-    setInternalError(id, errors) {
+    setInternalError(id, error) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.setError(Status.InternalError, id, errors);
+            return this.setError(Status.InternalError, id, error);
         });
     }
 }

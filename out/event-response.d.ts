@@ -11,7 +11,7 @@ export declare enum Status {
 export interface IResponse {
     status: Status;
     id?: string;
-    errors?: any[];
+    error?: any;
 }
 export declare class Failure {
     reference: FirebaseFirestore.DocumentReference;
@@ -26,11 +26,7 @@ export declare class Response {
     constructor(reference: FirebaseFirestore.DocumentReference);
     private makeResponse(status);
     setOK(id?: string): Promise<IResponse>;
-    private setError(status, id, errors?);
-    setBadRequest(id: string, errors?: [{
-        [key: string]: any;
-    }]): Promise<IResponse>;
-    setInternalError(id: string, errors?: [{
-        [key: string]: any;
-    }]): Promise<IResponse>;
+    private setError(status, id, error?);
+    setBadRequest(id: string, error?: any): Promise<IResponse>;
+    setInternalError(id: string, error?: any): Promise<IResponse>;
 }

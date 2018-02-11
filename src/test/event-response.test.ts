@@ -430,6 +430,20 @@ describe('setOK', async () => {
   })
 })
 
+describe('setFailure', async () => {
+  describe('id is undefined', () => {
+    test('response: ok', async () => {
+      const response = await new EventResponse.Response(user).setInternalError('id', 'error')
+      expect(response.status).toEqual(EventResponse.Status.InternalError)
+
+      const updatedUser = await admin.firestore().doc(user.path).get().then(s => s.data())
+      expect(updatedUser!.response.status).toBe(EventResponse.Status.InternalError)
+      expect(updatedUser!.response.id).toBe('id')
+      expect(updatedUser!.response.error).toBe('error')
+    })
+  })
+})
+
 //   describe('failure not exists', () => {
 //     test('success', async () => {
 //       order.neoTask = undefined
