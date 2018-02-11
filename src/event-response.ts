@@ -36,7 +36,7 @@ interface IFailure {
     createdAt: FirebaseFirestore.FieldValue
   }[],
   refPath: string,
-  reference: FirebaseFirestore.DocumentReference,
+  // reference: FirebaseFirestore.DocumentReference,
   createdAt: FirebaseFirestore.FieldValue
 }
 
@@ -68,7 +68,7 @@ export class Failure {
       const failure: IFailure = {
         errors: [this.makeError(response)],
         createdAt: FirebaseFirestore.FieldValue.serverTimestamp(),
-        reference: this.reference,
+        // reference: this.reference,
         refPath: this.reference.path
        }
       return failureRef.add(failure)

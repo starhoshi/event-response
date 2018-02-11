@@ -46,7 +46,7 @@ class Failure {
                 const failure = {
                     errors: [this.makeError(response)],
                     createdAt: FirebaseFirestore.FieldValue.serverTimestamp(),
-                    reference: this.reference,
+                    // reference: this.reference,
                     refPath: this.reference.path
                 };
                 return failureRef.add(failure);
