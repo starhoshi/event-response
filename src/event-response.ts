@@ -1,8 +1,6 @@
 import * as functions from 'firebase-functions'
 import * as FirebaseFirestore from '@google-cloud/firestore'
 import { DeltaDocumentSnapshot } from 'firebase-functions/lib/providers/firestore'
-import * as admin from 'firebase-admin'
-import { FieldValue } from '@google-cloud/firestore'
 
 let _firestore: FirebaseFirestore.Firestore
 let collectionPath: string | undefined
