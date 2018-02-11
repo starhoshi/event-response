@@ -8,15 +8,15 @@ When you use Cloud Functions's [Background Functions](https://cloud.google.com/f
 
 event-response is easy to understand like success status of HTTP and can record success / failure. It is also possible to handle it on the client side using the recorded status.
 
-# Install
+## Install
 
 ```
 yarn install event-response
 ```
 
-# Overview
+## Overview
 
-## OK
+### OK
 
 When Cloud Functions completes successfully, call `setOK()`.
 
@@ -28,7 +28,7 @@ new EventResponse.Response(user).setOK()
 
 <img src="https://raw.githubusercontent.com/starhoshi/event-response/master/docs/ok.png" width='70%' />
 
-## Bad Request
+### Bad Request
 
 When Cloud Functions fails on client side problems such as invalid parameters, call `setBadRequest()`. And you can set `id`, `error`.
 
@@ -40,7 +40,7 @@ new EventResponse.Response(user).setBadRequest('error_id', 'error reason')
 
 <img src="https://raw.githubusercontent.com/starhoshi/event-response/master/docs/badrequest.png" width='70%' />
 
-## Inernal Error
+### Inernal Error
 
 If an error occurs on the server side, call `setInternalError`. And you can set `id`, `error`.
 
