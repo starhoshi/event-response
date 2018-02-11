@@ -1,3 +1,7 @@
+<p align="center">
+    <img src="https://raw.githubusercontent.com/starhoshi/event-response/master/docs/logo.png" />
+</p>
+
 # event-response
 
 [![npm version](https://badge.fury.io/js/event-response.svg)](https://badge.fury.io/js/event-response)
