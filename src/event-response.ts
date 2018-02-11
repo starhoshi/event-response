@@ -19,7 +19,7 @@ export enum Status {
   InternalError = 'InternalError'
 }
 
-export interface IResponse {
+export interface IResult {
   status: Status
   id?: string
   error?: any
@@ -27,7 +27,7 @@ export interface IResponse {
 
 export interface IFailure {
   errors: {
-    response: IResponse,
+    result: IResult,
     createdAt: FirebaseFirestore.FieldValue
   }[],
   refPath: string,
@@ -44,14 +44,14 @@ export class Failure {
       .get()
   }
 
-  private makeError(response: IResponse) {
+  private makeError(result: IResult) {
     return {
-      response: response,
+      result: result,
       createdAt: new Date()
     }
   }
 
-  async add(response: IResponse) {
+  async add(result: IResult) {
     if (!collectionPath) {
       return
     }
@@ -61,7 +61,7 @@ export class Failure {
     if (querySnapshot.docs.length === 0) {
       const failureRef = _firestore.collection(collectionPath)
       const failure: IFailure = {
-        errors: [this.makeError(response)],
+        errors: [this.makeError(result)],
         createdAt: FirebaseFirestore.FieldValue.serverTimestamp(),
         // reference: this.reference,
         refPath: this.reference.path
@@ -69,7 +69,7 @@ export class Failure {
       return failureRef.add(failure)
     } else {
       const failure = querySnapshot.docs[0].data() as IFailure
-      failure.errors.push(this.makeError(response))
+      failure.errors.push(this.makeError(result))
 
       return querySnapshot.docs[0].ref.update(failure)
     }
@@ -92,44 +92,44 @@ export class Failure {
   }
 }
 
-export class Response {
+export class Result {
   reference: FirebaseFirestore.DocumentReference
 
   constructor(reference: FirebaseFirestore.DocumentReference) {
     this.reference = reference
   }
 
-  private makeResponse(status: Status): IResponse {
+  private makeResult(status: Status): IResult {
     return { status: status }
   }
 
   async setOK(id?: string) {
-    const response = this.makeResponse(Status.OK)
+    const result = this.makeResult(Status.OK)
     if (id) {
-      response.id = id
+      result.id = id
     }
 
     await Promise.all([
-      this.reference.update({ response: response }),
+      this.reference.update({ result: result }),
       new Failure(this.reference).clear()
     ])
 
-    return response
+    return result
   }
 
   private async setError(status: Status, id: string, error?: any) {
-    const response = this.makeResponse(status)
-    response.id = id
+    const result = this.makeResult(status)
+    result.id = id
     if (error) {
-      response.error = error
+      result.error = error
     }
 
     await Promise.all([
-      this.reference.update({ response: response }),
-      new Failure(this.reference).add(response)
+      this.reference.update({ result: result }),
+      new Failure(this.reference).add(result)
     ])
 
-    return response
+    return result
   }
 
   async setBadRequest(id: string, error?: any) {

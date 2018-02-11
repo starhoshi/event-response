@@ -29,13 +29,13 @@ class Failure {
             .where('refPath', '==', refPath)
             .get();
     }
-    makeError(response) {
+    makeError(result) {
         return {
-            response: response,
+            result: result,
             createdAt: new Date()
         };
     }
-    add(response) {
+    add(result) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!collectionPath) {
                 return;
@@ -44,7 +44,7 @@ class Failure {
             if (querySnapshot.docs.length === 0) {
                 const failureRef = _firestore.collection(collectionPath);
                 const failure = {
-                    errors: [this.makeError(response)],
+                    errors: [this.makeError(result)],
                     createdAt: FirebaseFirestore.FieldValue.serverTimestamp(),
                     // reference: this.reference,
                     refPath: this.reference.path
@@ -53,7 +53,7 @@ class Failure {
             }
             else {
                 const failure = querySnapshot.docs[0].data();
-                failure.errors.push(this.makeError(response));
+                failure.errors.push(this.makeError(result));
                 return querySnapshot.docs[0].ref.update(failure);
             }
         });
@@ -74,38 +74,38 @@ class Failure {
     }
 }
 exports.Failure = Failure;
-class Response {
+class Result {
     constructor(reference) {
         this.reference = reference;
     }
-    makeResponse(status) {
+    makeResult(status) {
         return { status: status };
     }
     setOK(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            const response = this.makeResponse(Status.OK);
+            const result = this.makeResult(Status.OK);
             if (id) {
-                response.id = id;
+                result.id = id;
             }
             yield Promise.all([
-                this.reference.update({ response: response }),
+                this.reference.update({ result: result }),
                 new Failure(this.reference).clear()
             ]);
-            return response;
+            return result;
         });
     }
     setError(status, id, error) {
         return __awaiter(this, void 0, void 0, function* () {
-            const response = this.makeResponse(status);
-            response.id = id;
+            const result = this.makeResult(status);
+            result.id = id;
             if (error) {
-                response.error = error;
+                result.error = error;
             }
             yield Promise.all([
-                this.reference.update({ response: response }),
-                new Failure(this.reference).add(response)
+                this.reference.update({ result: result }),
+                new Failure(this.reference).add(result)
             ]);
-            return response;
+            return result;
         });
     }
     setBadRequest(id, error) {
@@ -119,4 +119,4 @@ class Response {
         });
     }
 }
-exports.Response = Response;
+exports.Result = Result;

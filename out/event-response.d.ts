@@ -8,14 +8,14 @@ export declare enum Status {
     BadRequest = "BadRequest",
     InternalError = "InternalError",
 }
-export interface IResponse {
+export interface IResult {
     status: Status;
     id?: string;
     error?: any;
 }
 export interface IFailure {
     errors: {
-        response: IResponse;
+        result: IResult;
         createdAt: FirebaseFirestore.FieldValue;
     }[];
     refPath: string;
@@ -24,17 +24,17 @@ export interface IFailure {
 export declare class Failure {
     reference: FirebaseFirestore.DocumentReference;
     private makeQuerySnapshot(refPath);
-    private makeError(response);
-    add(response: IResponse): Promise<FirebaseFirestore.DocumentReference | FirebaseFirestore.WriteResult | undefined>;
+    private makeError(result);
+    add(result: IResult): Promise<FirebaseFirestore.DocumentReference | FirebaseFirestore.WriteResult | undefined>;
     clear(): Promise<FirebaseFirestore.WriteResult[] | undefined>;
     constructor(reference: FirebaseFirestore.DocumentReference);
 }
-export declare class Response {
+export declare class Result {
     reference: FirebaseFirestore.DocumentReference;
     constructor(reference: FirebaseFirestore.DocumentReference);
-    private makeResponse(status);
-    setOK(id?: string): Promise<IResponse>;
+    private makeResult(status);
+    setOK(id?: string): Promise<IResult>;
     private setError(status, id, error?);
-    setBadRequest(id: string, error?: any): Promise<IResponse>;
-    setInternalError(id: string, error?: any): Promise<IResponse>;
+    setBadRequest(id: string, error?: any): Promise<IResult>;
+    setInternalError(id: string, error?: any): Promise<IResult>;
 }

@@ -28,26 +28,26 @@ beforeAll(async () => {
   EventResponse.configure({ collectionPath: collectionPath })
 })
 
-const expectOK = async (response: EventResponse.IResponse, ref: FirebaseFirestore.DocumentReference, id?: string) => {
-  expect(response.status).toEqual(EventResponse.Status.OK)
-  expect(response.id).toBe(id)
-  expect(response.error).toBeUndefined()
+const expectOK = async (result: EventResponse.IResult, ref: FirebaseFirestore.DocumentReference, id?: string) => {
+  expect(result.status).toEqual(EventResponse.Status.OK)
+  expect(result.id).toBe(id)
+  expect(result.error).toBeUndefined()
 
   const updatedUser = await admin.firestore().doc(ref.path).get().then(s => s.data())
-  expect(updatedUser!.response.status).toBe(EventResponse.Status.OK)
-  expect(updatedUser!.response.id).toBe(id)
-  expect(updatedUser!.response.error).toBeUndefined()
+  expect(updatedUser!.result.status).toBe(EventResponse.Status.OK)
+  expect(updatedUser!.result.id).toBe(id)
+  expect(updatedUser!.result.error).toBeUndefined()
 }
 
-const expectError = async (status: EventResponse.Status, response: EventResponse.IResponse, ref: FirebaseFirestore.DocumentReference, id?: string, error?: any) => {
-  expect(response.status).toEqual(status)
-  expect(response.id).toBe(id)
-  expect(response.error).toBe(error)
+const expectError = async (status: EventResponse.Status, result: EventResponse.IResult, ref: FirebaseFirestore.DocumentReference, id?: string, error?: any) => {
+  expect(result.status).toEqual(status)
+  expect(result.id).toBe(id)
+  expect(result.error).toBe(error)
 
   const updatedUser = await admin.firestore().doc(ref.path).get().then(s => s.data())
-  expect(updatedUser!.response.status).toBe(status)
-  expect(updatedUser!.response.id).toBe(id)
-  expect(updatedUser!.response.error).toBe(error)
+  expect(updatedUser!.result.status).toBe(status)
+  expect(updatedUser!.result.id).toBe(id)
+  expect(updatedUser!.result.error).toBe(error)
 }
 
 const expectFailureIsEmpty = async (ref: FirebaseFirestore.DocumentReference) => {
@@ -57,24 +57,24 @@ const expectFailureIsEmpty = async (ref: FirebaseFirestore.DocumentReference) =>
 
 describe('setOK', async () => {
   describe('id is undefined', () => {
-    test('response: ok and id is undefined', async () => {
-      const response = await new EventResponse.Response(user).setOK()
-      await expectOK(response, user)
+    test('result: ok and id is undefined', async () => {
+      const result = await new EventResponse.Result(user).setOK()
+      await expectOK(result, user)
     })
   })
 
   describe('id is set', () => {
-    test('response: ok and id is set', async () => {
-      const response = await new EventResponse.Response(user).setOK('success')
-      await expectOK(response, user, 'success')
+    test('result: ok and id is set', async () => {
+      const result = await new EventResponse.Result(user).setOK('success')
+      await expectOK(result, user, 'success')
     })
   })
 
   describe('EventResponse.collectionPath exist', async () => {
     test('failure is empty', async () => {
-      let response = await new EventResponse.Response(user).setBadRequest(errorID)
-      response = await new EventResponse.Response(user).setOK()
-      await expectOK(response, user)
+      let result = await new EventResponse.Result(user).setBadRequest(errorID)
+      result = await new EventResponse.Result(user).setOK()
+      await expectOK(result, user)
       await expectFailureIsEmpty(user)
     })
   })
@@ -88,9 +88,9 @@ describe('setOK', async () => {
     })
 
     test('failure is empty', async () => {
-      let response = await new EventResponse.Response(user).setBadRequest(errorID)
-      response = await new EventResponse.Response(user).setOK()
-      await expectOK(response, user)
+      let result = await new EventResponse.Result(user).setBadRequest(errorID)
+      result = await new EventResponse.Result(user).setOK()
+      await expectOK(result, user)
       await expectFailureIsEmpty(user)
     })
   })
@@ -103,8 +103,8 @@ describe('setOK', async () => {
 describe('setBadRequest', async () => {
   describe('error is undefined', () => {
     test('set Bad Request and created Failure', async () => {
-      const response = await new EventResponse.Response(user).setBadRequest(errorID)
-      await expectError(EventResponse.Status.BadRequest, response, user, errorID, undefined)
+      const result = await new EventResponse.Result(user).setBadRequest(errorID)
+      await expectError(EventResponse.Status.BadRequest, result, user, errorID, undefined)
 
       const querySnapshot = await admin.firestore().collection(collectionPath).where('refPath', '==', user.path).get()
       expect(querySnapshot.docs.length).toBe(1)
@@ -112,7 +112,7 @@ describe('setBadRequest', async () => {
       expect(failure.createdAt).toBeDefined()
       expect(failure.refPath).toBe(user.path)
       expect(failure.errors[0].createdAt).toBeDefined()
-      expect(failure.errors[0].response).toEqual(response)
+      expect(failure.errors[0].result).toEqual(result)
     })
   })
 })
@@ -120,8 +120,8 @@ describe('setBadRequest', async () => {
 describe('setInternalError', async () => {
   describe('error is undefined', () => {
     test('set Internal Error and created Failure', async () => {
-      const response = await new EventResponse.Response(user).setInternalError(errorID)
-      await expectError(EventResponse.Status.InternalError, response, user, errorID, undefined)
+      const result = await new EventResponse.Result(user).setInternalError(errorID)
+      await expectError(EventResponse.Status.InternalError, result, user, errorID, undefined)
 
       const querySnapshot = await admin.firestore().collection(collectionPath).where('refPath', '==', user.path).get()
       expect(querySnapshot.docs.length).toBe(1)
@@ -129,14 +129,14 @@ describe('setInternalError', async () => {
       expect(failure.createdAt).toBeDefined()
       expect(failure.refPath).toBe(user.path)
       expect(failure.errors[0].createdAt).toBeDefined()
-      expect(failure.errors[0].response).toEqual(response)
+      expect(failure.errors[0].result).toEqual(result)
     })
   })
 
   describe('EventResponse.collectionPath exist', async () => {
     test('set Internal Error and created Failure', async () => {
-      const response = await new EventResponse.Response(user).setInternalError(errorID, errorError)
-      await expectError(EventResponse.Status.InternalError, response, user, errorID, errorError)
+      const result = await new EventResponse.Result(user).setInternalError(errorID, errorError)
+      await expectError(EventResponse.Status.InternalError, result, user, errorID, errorError)
 
       const querySnapshot = await admin.firestore().collection(collectionPath).where('refPath', '==', user.path).get()
       expect(querySnapshot.docs.length).toBe(1)
@@ -144,15 +144,15 @@ describe('setInternalError', async () => {
       expect(failure.createdAt).toBeDefined()
       expect(failure.refPath).toBe(user.path)
       expect(failure.errors[0].createdAt).toBeDefined()
-      expect(failure.errors[0].response).toEqual(response)
+      expect(failure.errors[0].result).toEqual(result)
     })
 
     describe('multiple set error', async () => {
       test('error count is 3', async () => {
-        let response = await new EventResponse.Response(user).setInternalError(errorID, errorError)
-        response = await new EventResponse.Response(user).setInternalError(errorID, errorError)
-        response = await new EventResponse.Response(user).setInternalError(errorID, errorError)
-        await expectError(EventResponse.Status.InternalError, response, user, errorID, errorError)
+        let result = await new EventResponse.Result(user).setInternalError(errorID, errorError)
+        result = await new EventResponse.Result(user).setInternalError(errorID, errorError)
+        result = await new EventResponse.Result(user).setInternalError(errorID, errorError)
+        await expectError(EventResponse.Status.InternalError, result, user, errorID, errorError)
 
         const querySnapshot = await admin.firestore().collection(collectionPath).where('refPath', '==', user.path).get()
         expect(querySnapshot.docs.length).toBe(1)
@@ -173,8 +173,8 @@ describe('setInternalError', async () => {
     })
 
     test('set Internal Error but not created Failure', async () => {
-      const response = await new EventResponse.Response(user).setInternalError(errorID, errorError)
-      await expectError(EventResponse.Status.InternalError, response, user, errorID, errorError)
+      const result = await new EventResponse.Result(user).setInternalError(errorID, errorError)
+      await expectError(EventResponse.Status.InternalError, result, user, errorID, errorError)
       await expectFailureIsEmpty(user)
     })
   })
