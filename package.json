@@ -1,0 +1,50 @@
+{
+  "name": "event-response",
+  "version": "0.0.1",
+  "description": "Handle the results of Cloud Functions like http status code.",
+  "main": "out/index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/starhoshi/event-response.git"
+  },
+  "keywords": [
+    "firebase",
+    "firestore",
+    "cloudfunctions"
+  ],
+  "author": "star__hoshi",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/starhoshi/event-response/issues"
+  },
+  "homepage": "https://github.com/starhoshi/event-response#readme",
+  "jest": {
+    "transform": {
+      "\\.ts": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "src/test/.*.test.ts",
+    "moduleFileExtensions": [
+      "ts",
+      "js",
+      "json"
+    ]
+  },
+  "devDependencies": {
+    "@types/jest": "^22.1.2",
+    "coveralls": "^3.0.0",
+    "firebase-tools": "^3.17.4",
+    "jest": "^22.2.2",
+    "rescue-fire": "^0.2.0",
+    "ts-jest": "^22.0.3",
+    "tslint": "^5.9.1",
+    "typescript": "^2.7.1"
+  },
+  "dependencies": {
+    "@google-cloud/firestore": "^0.11.2",
+    "firebase-admin": "^5.8.2",
+    "firebase-functions": "^0.8.1"
+  }
+}
