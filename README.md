@@ -1,6 +1,7 @@
 # event-response
 
 [![npm version](https://badge.fury.io/js/event-response.svg)](https://badge.fury.io/js/event-response)
+[![Build Status](https://travis-ci.org/starhoshi/event-response.svg?branch=master)](https://travis-ci.org/starhoshi/event-response)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/9ff0f9753f4c4217b20c5eec7b25f7af)](https://www.codacy.com/app/kensuke1751/event-response?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=starhoshi/event-response&amp;utm_campaign=Badge_Grade)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
