@@ -1,6 +1,6 @@
 {
   "name": "event-response",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Handle the results of Cloud Functions like http status code.",
   "main": "out/event-response.js",
   "types": "out/event-response.d.ts",
