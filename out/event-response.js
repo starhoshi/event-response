@@ -1,10 +1,4 @@
 "use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -15,137 +9,214 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const FirebaseFirestore = require("@google-cloud/firestore");
-const pring_1 = require("pring");
-var firestore;
-function initialize(options) {
-    firestore = new FirebaseFirestore.Firestore(options);
-    pring_1.Pring.initialize(options);
+let _firestore;
+let _failureOptions;
+function initialize(adminOptions, failureOptions) {
+    _firestore = new FirebaseFirestore.Firestore(adminOptions);
+    _failureOptions = failureOptions;
+    // Pring.initialize(options)
 }
 exports.initialize = initialize;
-class ValidationError extends Error {
-    constructor(validationErrorType, reason) {
-        super();
-        this.validationErrorType = validationErrorType;
-        this.reason = reason;
-    }
-}
-exports.ValidationError = ValidationError;
-class Failure extends pring_1.Pring.Base {
-    static querySnapshot(refPath) {
-        return firestore.collection('version/1/failure')
+var Status;
+(function (Status) {
+    Status[Status["OK"] = 200] = "OK";
+    Status[Status["BadRequest"] = 400] = "BadRequest";
+    Status[Status["InternalError"] = 500] = "InternalError";
+})(Status = exports.Status || (exports.Status = {}));
+class Failure {
+    makeQuerySnapshot(refPath) {
+        return _firestore.collection(_failureOptions.collectionPath)
             .where('refPath', '==', refPath)
             .get();
     }
-    static setFailure(model, neoTask) {
+    makeError(response) {
+        return {
+            response: response,
+            createdAt: FirebaseFirestore.FieldValue.serverTimestamp()
+        };
+    }
+    add(response) {
         return __awaiter(this, void 0, void 0, function* () {
-            const querySnapshot = yield Failure.querySnapshot(model.reference.path);
+            if (!_failureOptions) {
+                return;
+            }
+            const querySnapshot = yield this.makeQuerySnapshot(this.reference.path);
             if (querySnapshot.docs.length === 0) {
-                const failure = new Failure();
-                // FIXME: Error: Cannot encode type ([object Object])
-                // failure.ref = documentSnapshot.ref
-                failure.refPath = model.reference.path;
-                failure.neoTask = neoTask.rawValue();
-                return failure.save();
+                const failureRef = _firestore.collection(_failureOptions.collectionPath);
+                const failure = {
+                    errors: [this.makeError(response)],
+                    createdAt: FirebaseFirestore.FieldValue.serverTimestamp(),
+                    reference: this.reference,
+                    refPath: this.reference.path
+                };
+                return failureRef.add(failure);
             }
             else {
-                const failure = new Failure();
-                failure.init(querySnapshot.docs[0]);
-                // FIXME: Error: Cannot encode type ([object Object])
-                // failure.ref = documentSnapshot.ref
-                failure.refPath = model.reference.path;
-                failure.neoTask = neoTask.rawValue();
-                return failure.update();
+                const failure = querySnapshot.docs[0].data();
+                failure.errors.push(this.makeError(response));
+                return querySnapshot.docs[0].ref.update(failure);
             }
         });
     }
-    static deleteFailure(model) {
+    clear() {
         return __awaiter(this, void 0, void 0, function* () {
-            const querySnapshot = yield Failure.querySnapshot(model.reference.path);
-            for (const doc of querySnapshot.docs) {
-                const failure = new Failure();
-                failure.init(doc);
-                yield failure.delete();
+            if (!_failureOptions) {
+                return;
             }
+            const querySnapshot = yield this.makeQuerySnapshot(this.reference.path);
+            return Promise.all(querySnapshot.docs.map(doc => {
+                return doc.ref.delete();
+            }));
         });
+    }
+    constructor(reference) {
+        this.reference = reference;
     }
 }
-__decorate([
-    pring_1.property
-], Failure.prototype, "ref", void 0);
-__decorate([
-    pring_1.property
-], Failure.prototype, "refPath", void 0);
-__decorate([
-    pring_1.property
-], Failure.prototype, "neoTask", void 0);
 exports.Failure = Failure;
-var NeoTaskStatus;
-(function (NeoTaskStatus) {
-    NeoTaskStatus[NeoTaskStatus["none"] = 0] = "none";
-    NeoTaskStatus[NeoTaskStatus["success"] = 1] = "success";
-    NeoTaskStatus[NeoTaskStatus["failure"] = 2] = "failure";
-})(NeoTaskStatus = exports.NeoTaskStatus || (exports.NeoTaskStatus = {}));
-class NeoTask extends pring_1.Pring.Base {
-    static makeNeoTask(model) {
-        let neoTask = new NeoTask();
-        if (model.neoTask) {
-            if (model.neoTask.status) {
-                neoTask.status = model.neoTask.status;
-            }
-            if (model.neoTask.invalid) {
-                neoTask.invalid = model.neoTask.invalid;
-            }
-            if (model.neoTask.fatal) {
-                neoTask.fatal = model.neoTask.fatal;
-            }
-        }
-        return neoTask;
+class Response {
+    constructor(reference) {
+        this.reference = reference;
     }
-    static setInvalid(model, error) {
+    makeResponse(status) {
+        return { status: status };
+    }
+    setOK(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            let neoTask = NeoTask.makeNeoTask(model);
-            neoTask.status = NeoTaskStatus.failure;
-            neoTask.invalid = {
-                validationError: error.validationErrorType,
-                reason: error.reason
-            };
-            yield model.reference.update({ neoTask: neoTask.rawValue() });
-            model.neoTask = neoTask.rawValue();
-            return model;
+            const response = this.makeResponse(Status.OK);
+            if (id) {
+                response.id = id;
+            }
+            yield Promise.all([
+                this.reference.update({ response: response }),
+                new Failure(this.reference).clear()
+            ]);
+            return response;
         });
     }
-    static setFatal(model, step, error) {
+    setError(status, id, errors) {
         return __awaiter(this, void 0, void 0, function* () {
-            let neoTask = NeoTask.makeNeoTask(model);
-            neoTask.status = NeoTaskStatus.failure;
-            neoTask.fatal = {
-                step: step,
-                error: error
-            };
-            yield model.reference.update({ neoTask: neoTask.rawValue() });
-            yield Failure.setFailure(model, neoTask);
-            model.neoTask = neoTask.rawValue();
-            return model;
+            const response = this.makeResponse(status);
+            response.id = id;
+            if (errors) {
+                response.errors = errors;
+            }
+            yield Promise.all([
+                this.reference.update({ response: response }),
+                new Failure(this.reference).add(response)
+            ]);
+            return response;
         });
     }
-    static setSuccess(model) {
+    setBadRequest(id, errors) {
         return __awaiter(this, void 0, void 0, function* () {
-            let neoTask = new NeoTask();
-            neoTask.status = NeoTaskStatus.success;
-            yield model.reference.update({ neoTask: neoTask.rawValue() });
-            yield Failure.deleteFailure(model);
-            model.neoTask = neoTask.rawValue();
-            return model;
+            return this.setError(Status.BadRequest, id, errors);
+        });
+    }
+    setInternalError(id, errors) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.setError(Status.InternalError, id, errors);
         });
     }
 }
-__decorate([
-    pring_1.property
-], NeoTask.prototype, "status", void 0);
-__decorate([
-    pring_1.property
-], NeoTask.prototype, "invalid", void 0);
-__decorate([
-    pring_1.property
-], NeoTask.prototype, "fatal", void 0);
-exports.NeoTask = NeoTask;
+exports.Response = Response;
+// export class ValidationError extends Error {
+//   validationErrorType: string
+//   reason: string
+//   option?: any
+//   constructor(validationErrorType: string, reason: string) {
+//     super()
+//     this.validationErrorType = validationErrorType
+//     this.reason = reason
+//   }
+// }
+// export class Failure<T extends HasNeoTask> extends Pring.Base {
+//   @property ref: FirebaseFirestore.DocumentReference
+//   @property refPath: string
+//   @property neoTask: NeoTask
+//   static querySnapshot(refPath: string) {
+//     return firestore.collection('version/1/failure')
+//       .where('refPath', '==', refPath)
+//       .get()
+//   }
+//   static async setFailure<T extends HasNeoTask>(model: T, neoTask: NeoTask) {
+//     const querySnapshot = await Failure.querySnapshot(model.reference.path)
+//     if (querySnapshot.docs.length === 0) {
+//       const failure = new Failure()
+//       // FIXME: Error: Cannot encode type ([object Object])
+//       // failure.ref = documentSnapshot.ref
+//       failure.refPath = model.reference.path
+//       failure.neoTask = neoTask.rawValue()
+//       return failure.save()
+//     } else {
+//       const failure = new Failure()
+//       failure.init(querySnapshot.docs[0])
+//       // FIXME: Error: Cannot encode type ([object Object])
+//       // failure.ref = documentSnapshot.ref
+//       failure.refPath = model.reference.path
+//       failure.neoTask = neoTask.rawValue()
+//       return failure.update()
+//     }
+//   }
+//   static async deleteFailure<T extends HasNeoTask>(model: T) {
+//     const querySnapshot = await Failure.querySnapshot(model.reference.path)
+//     for (const doc of querySnapshot.docs) {
+//       const failure = new Failure()
+//       failure.init(doc)
+//       await failure.delete()
+//     }
+//   }
+// }
+// export enum NeoTaskStatus {
+//   none = 0,
+//   success = 1,
+//   failure = 2
+// }
+// export interface HasNeoTask extends Pring.Base {
+//   neoTask?: NeoTask
+// }
+// export class NeoTask extends Pring.Base {
+//   @property status?: NeoTaskStatus
+//   @property invalid?: { validationError: string, reason: string }
+//   @property fatal?: { step: string, error: string }
+//   static makeNeoTask<T extends HasNeoTask>(model: T) {
+//     let neoTask = new NeoTask()
+//     if (model.neoTask) {
+//       if (model.neoTask.status) { neoTask.status = model.neoTask.status }
+//       if (model.neoTask.invalid) { neoTask.invalid = model.neoTask.invalid }
+//       if (model.neoTask.fatal) { neoTask.fatal = model.neoTask.fatal }
+//     }
+//     return neoTask
+//   }
+//   static async setInvalid<T extends HasNeoTask>(model: T, error: ValidationError) {
+//     let neoTask = NeoTask.makeNeoTask(model)
+//     neoTask.status = NeoTaskStatus.failure
+//     neoTask.invalid = {
+//       validationError: error.validationErrorType,
+//       reason: error.reason
+//     }
+//     await model.reference.update({ neoTask: neoTask.rawValue() })
+//     model.neoTask = neoTask.rawValue()
+//     return model
+//   }
+//   static async setFatal<T extends HasNeoTask>(model: T, step: string, error: any) {
+//     let neoTask = NeoTask.makeNeoTask(model)
+//     neoTask.status = NeoTaskStatus.failure
+//     neoTask.fatal = {
+//       step: step,
+//       error: error
+//     }
+//     await model.reference.update({ neoTask: neoTask.rawValue() })
+//     await Failure.setFailure(model, neoTask)
+//     model.neoTask = neoTask.rawValue()
+//     return model
+//   }
+//   static async setSuccess<T extends HasNeoTask>(model: T) {
+//     let neoTask = new NeoTask()
+//     neoTask.status = NeoTaskStatus.success
+//     await model.reference.update({ neoTask: neoTask.rawValue() })
+//     await Failure.deleteFailure(model)
+//     model.neoTask = neoTask.rawValue()
+//     return model
+//   }
+// }

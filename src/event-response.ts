@@ -7,7 +7,8 @@ import { FieldValue } from '@google-cloud/firestore'
 
 let _firestore: FirebaseFirestore.Firestore
 let _failureOptions: FailureOptions | undefined
-interface FailureOptions {
+
+export interface FailureOptions {
   collectionPath: string
 }
 
@@ -23,59 +24,10 @@ export enum Status {
   InternalError = 500
 }
 
-interface IResponse {
+export interface IResponse {
   status: Status
   id?: string
   errors?: [{ [key: string]: any }]
-}
-
-export class Response {
-  reference: FirebaseFirestore.DocumentReference
-
-  constructor(reference: FirebaseFirestore.DocumentReference) {
-    this.reference = reference
-  }
-
-  private makeResponse(status: Status): IResponse {
-    return { status: status }
-  }
-
-  async setOK(id?: string) {
-    const response = this.makeResponse(Status.OK)
-    if (id) {
-      response.id = id
-    }
-
-    await Promise.all([
-      this.reference.update({ response: response }),
-      new Failure(this.reference).clear()
-    ])
-
-    return response
-  }
-
-  private async setError(status: Status, id: string, errors?: [{ [key: string]: any }]) {
-    const response = this.makeResponse(status)
-    response.id = id
-    if (errors) {
-      response.errors = errors
-    }
-
-    await Promise.all([
-      this.reference.update({ response: response }),
-      new Failure(this.reference).add(response)
-    ])
-
-    return response
-  }
-
-  async setBadRequest(id: string, errors?: [{ [key: string]: any }]) {
-    return this.setError(Status.BadRequest, id, errors)
-  }
-
-  async setInternalError(id: string, errors?: [{ [key: string]: any }]) {
-    return this.setError(Status.InternalError, id, errors)
-  }
 }
 
 interface IFailure {
@@ -142,6 +94,55 @@ export class Failure {
 
   constructor(reference: FirebaseFirestore.DocumentReference) {
     this.reference = reference
+  }
+}
+
+export class Response {
+  reference: FirebaseFirestore.DocumentReference
+
+  constructor(reference: FirebaseFirestore.DocumentReference) {
+    this.reference = reference
+  }
+
+  private makeResponse(status: Status): IResponse {
+    return { status: status }
+  }
+
+  async setOK(id?: string) {
+    const response = this.makeResponse(Status.OK)
+    if (id) {
+      response.id = id
+    }
+
+    await Promise.all([
+      this.reference.update({ response: response }),
+      new Failure(this.reference).clear()
+    ])
+
+    return response
+  }
+
+  private async setError(status: Status, id: string, errors?: [{ [key: string]: any }]) {
+    const response = this.makeResponse(status)
+    response.id = id
+    if (errors) {
+      response.errors = errors
+    }
+
+    await Promise.all([
+      this.reference.update({ response: response }),
+      new Failure(this.reference).add(response)
+    ])
+
+    return response
+  }
+
+  async setBadRequest(id: string, errors?: [{ [key: string]: any }]) {
+    return this.setError(Status.BadRequest, id, errors)
+  }
+
+  async setInternalError(id: string, errors?: [{ [key: string]: any }]) {
+    return this.setError(Status.InternalError, id, errors)
   }
 }
 

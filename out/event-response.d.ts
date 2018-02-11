@@ -1,40 +1,38 @@
 import * as FirebaseFirestore from '@google-cloud/firestore';
-import { Pring } from 'pring';
-export declare function initialize(options?: any): void;
-export declare class ValidationError extends Error {
-    validationErrorType: string;
-    reason: string;
-    option?: any;
-    constructor(validationErrorType: string, reason: string);
+export interface FailureOptions {
+    collectionPath: string;
 }
-export declare class Failure<T extends HasNeoTask> extends Pring.Base {
-    ref: FirebaseFirestore.DocumentReference;
-    refPath: string;
-    neoTask: NeoTask;
-    static querySnapshot(refPath: string): Promise<FirebaseFirestore.QuerySnapshot>;
-    static setFailure<T extends HasNeoTask>(model: T, neoTask: NeoTask): Promise<any>;
-    static deleteFailure<T extends HasNeoTask>(model: T): Promise<void>;
+export declare function initialize(adminOptions: any, failureOptions?: FailureOptions): void;
+export declare enum Status {
+    OK = 200,
+    BadRequest = 400,
+    InternalError = 500,
 }
-export declare enum NeoTaskStatus {
-    none = 0,
-    success = 1,
-    failure = 2,
+export interface IResponse {
+    status: Status;
+    id?: string;
+    errors?: [{
+        [key: string]: any;
+    }];
 }
-export interface HasNeoTask extends Pring.Base {
-    neoTask?: NeoTask;
+export declare class Failure {
+    reference: FirebaseFirestore.DocumentReference;
+    private makeQuerySnapshot(refPath);
+    private makeError(response);
+    add(response: IResponse): Promise<FirebaseFirestore.DocumentReference | FirebaseFirestore.WriteResult | undefined>;
+    clear(): Promise<FirebaseFirestore.WriteResult[] | undefined>;
+    constructor(reference: FirebaseFirestore.DocumentReference);
 }
-export declare class NeoTask extends Pring.Base {
-    status?: NeoTaskStatus;
-    invalid?: {
-        validationError: string;
-        reason: string;
-    };
-    fatal?: {
-        step: string;
-        error: string;
-    };
-    static makeNeoTask<T extends HasNeoTask>(model: T): NeoTask;
-    static setInvalid<T extends HasNeoTask>(model: T, error: ValidationError): Promise<T>;
-    static setFatal<T extends HasNeoTask>(model: T, step: string, error: any): Promise<T>;
-    static setSuccess<T extends HasNeoTask>(model: T): Promise<T>;
+export declare class Response {
+    reference: FirebaseFirestore.DocumentReference;
+    constructor(reference: FirebaseFirestore.DocumentReference);
+    private makeResponse(status);
+    setOK(id?: string): Promise<IResponse>;
+    private setError(status, id, errors?);
+    setBadRequest(id: string, errors?: [{
+        [key: string]: any;
+    }]): Promise<IResponse>;
+    setInternalError(id: string, errors?: [{
+        [key: string]: any;
+    }]): Promise<IResponse>;
 }
