@@ -2,9 +2,14 @@
   "name": "event-response",
   "version": "0.0.1",
   "description": "Handle the results of Cloud Functions like http status code.",
-  "main": "out/index.js",
+  "main": "out/event-response.js",
+  "types": "out/event-response.d.ts",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "tslint -p tslint.json && tsc -d",
+    "publish:patch": "yarn run build && npm version patch && git commit -am 'publish' && git push origin master && npm publish --access=public",
+    "publish:minor": "yarn run build && npm version minor && git commit -am 'publish' && git push origin master && npm publish --access=public",
+    "publish:major": "yarn run build && npm version major && git commit -am 'publish' && git push origin master && npm publish --access=public"
   },
   "repository": {
     "type": "git",
