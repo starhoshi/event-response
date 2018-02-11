@@ -5,12 +5,15 @@ import * as admin from 'firebase-admin'
 // import { Pring, property } from 'pring'
 import { FieldValue } from '@google-cloud/firestore'
 
-let firestore: FirebaseFirestore.Firestore
-let _isSetFailure: boolean
+let _firestore: FirebaseFirestore.Firestore
+let _failureOptions: FailureOptions | undefined
+interface FailureOptions {
+  collectionPath: string
+}
 
-export function initialize(adminOptions: any, isSetFailure: boolean = false) {
-  firestore = new FirebaseFirestore.Firestore(adminOptions)
-  _isSetFailure = isSetFailure
+export function initialize(adminOptions: any, failureOptions?: FailureOptions) {
+  _firestore = new FirebaseFirestore.Firestore(adminOptions)
+  _failureOptions = failureOptions
   // Pring.initialize(options)
 }
 
@@ -43,33 +46,102 @@ export class Response {
       response.id = id
     }
 
-    await this.reference.update({ response: response })
+    await Promise.all([
+      this.reference.update({ response: response }),
+      new Failure(this.reference).clear()
+    ])
+
+    return response
+  }
+
+  private async setError(status: Status, id: string, errors?: [{ [key: string]: any }]) {
+    const response = this.makeResponse(status)
+    response.id = id
+    if (errors) {
+      response.errors = errors
+    }
+
+    await Promise.all([
+      this.reference.update({ response: response }),
+      new Failure(this.reference).add(response)
+    ])
 
     return response
   }
 
   async setBadRequest(id: string, errors?: [{ [key: string]: any }]) {
-    const response = this.makeResponse(Status.BadRequest)
-    response.id = id
-    if (errors) {
-      response.errors = errors
-    }
-
-    await this.reference.update({ response: response })
-
-    return response
+    return this.setError(Status.BadRequest, id, errors)
   }
 
   async setInternalError(id: string, errors?: [{ [key: string]: any }]) {
-    const response = this.makeResponse(Status.InternalError)
-    response.id = id
-    if (errors) {
-      response.errors = errors
+    return this.setError(Status.InternalError, id, errors)
+  }
+}
+
+interface IFailure {
+  errors: {
+    response: IResponse,
+    createdAt: FirebaseFirestore.FieldValue
+  }[],
+  refPath: string,
+  reference: FirebaseFirestore.DocumentReference,
+  createdAt: FirebaseFirestore.FieldValue
+}
+
+export class Failure {
+  reference: FirebaseFirestore.DocumentReference
+
+  private makeQuerySnapshot(refPath: string) {
+    return _firestore.collection(_failureOptions!.collectionPath)
+      .where('refPath', '==', refPath)
+      .get()
+  }
+
+  private makeError(response: IResponse) {
+    return {
+      response: response,
+      createdAt: FirebaseFirestore.FieldValue.serverTimestamp()
+    }
+  }
+
+  async add(response: IResponse) {
+    if (!_failureOptions) {
+      return
     }
 
-    await this.reference.update({ response: response })
+    const querySnapshot = await this.makeQuerySnapshot(this.reference.path)
 
-    return response
+    if (querySnapshot.docs.length === 0) {
+      const failureRef = _firestore.collection(_failureOptions.collectionPath)
+      const failure: IFailure = {
+        errors: [this.makeError(response)],
+        createdAt: FirebaseFirestore.FieldValue.serverTimestamp(),
+        reference: this.reference,
+        refPath: this.reference.path
+       }
+      return failureRef.add(failure)
+    } else {
+      const failure = querySnapshot.docs[0].data() as IFailure
+      failure.errors.push(this.makeError(response))
+
+      return querySnapshot.docs[0].ref.update(failure)
+    }
+  }
+
+  async clear() {
+    if (!_failureOptions) {
+      return
+    }
+
+    const querySnapshot = await this.makeQuerySnapshot(this.reference.path)
+
+    return Promise.all(querySnapshot.docs.map(doc => {
+      return doc.ref.delete()
+    }))
+  }
+
+  constructor(reference: FirebaseFirestore.DocumentReference) {
+    this.reference = reference
   }
 }
 
