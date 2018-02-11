@@ -32,7 +32,7 @@ class Failure {
     makeError(response) {
         return {
             response: response,
-            createdAt: new Date().toUTCString()
+            createdAt: new Date()
         };
     }
     add(response) {

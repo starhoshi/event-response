@@ -47,7 +47,7 @@ export class Failure {
   private makeError(response: IResponse) {
     return {
       response: response,
-      createdAt: new Date().toUTCString()
+      createdAt: new Date()
     }
   }
 
