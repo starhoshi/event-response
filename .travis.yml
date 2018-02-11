@@ -5,4 +5,5 @@ dist: trusty
 sudo: false
 cache: yarn
 script: yarn run build
-
+notifications:
+  email: false
