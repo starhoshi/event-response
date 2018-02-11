@@ -4,52 +4,58 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/9ff0f9753f4c4217b20c5eec7b25f7af)](https://www.codacy.com/app/kensuke1751/event-response?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=starhoshi/event-response&amp;utm_campaign=Badge_Grade)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-Background Functions の
-[Background Functions](https://cloud.google.com/functions/docs/writing/background) の成功/失敗を記録したり、クライアント側に処理がどうなったか伝えたくないですか？
+When you use Cloud Functions's [Background Functions](https://cloud.google.com/functions/docs/writing/background), have you ever wanted to record success / failure respond to the client side that it succeeded?
 
-event-response は HTTP の status のようにわかりやすく成功/失敗を記録することができます。記録されたステータスを見てクライアント側で適切に対処することも可能です。
+event-response is easy to understand like success status of HTTP and can record success / failure. It is also possible to handle it on the client side using the recorded status.
 
-# Install
+## Install
 
 ```
 yarn install event-response
 ```
 
-## succeeded
+## Overview
 
-If Cound Functions succedded, set response.status = 'OK'.
-HTTP say 200.
+### OK
+
+When Cloud Functions completes successfully, call `setOK()`.
+
+It is 200 in http.
 
 ```ts
 new EventResponse.Response(user).setOK()
 ```
 
-TODO: image
+<img src="https://raw.githubusercontent.com/starhoshi/event-response/master/docs/ok.png" width='70%' />
 
-## Bad Request
+### Bad Request
 
-Cloud Functions failed Because parameter is invalid. Set response.status = 'BadRequest'. And you can set `id`, `error`.
-HTTP say 400.
+When Cloud Functions fails on client side problems such as invalid parameters, call `setBadRequest()`. And you can set `id`, `error`.
+
+It is 400 in http.
 
 ```ts
 new EventResponse.Response(user).setBadRequest('error_id', 'error reason')
 ```
 
-TODO: image
+<img src="https://raw.githubusercontent.com/starhoshi/event-response/master/docs/badrequest.png" width='70%' />
 
-## Inernal Error
+### Inernal Error
 
-If , set response.status = 'BadRequest'. And you can set `id`, `error`.
-HTTP say 400.
+If an error occurs on the server side, call `setInternalError`. And you can set `id`, `error`.
+
+It is 500 in http.
 
 ```ts
 new EventResponse.Response(user).setInternalError('error_id', 'error reason')
 ```
 
-TODO: image
+<img src="https://raw.githubusercontent.com/starhoshi/event-response/master/docs/internal.png" width='70%' />
 
 
 ## Usage
+
+This sample is written in TypeScript.
 
 ### 1. Initialize
 
@@ -64,12 +70,11 @@ EventResponse.initialize(functions.config().firebase)
 
 ### 2. Call set method
 
+You can set 3 pattens.
+
 * OK
-    * HTTP でいう 200(正常に処理が終了)
 * BadRequest
-    * HTTP でいう 400(クライアント側で修正が必要な場合)
 * InternalError
-    * HTTP でいう 500(サーバ側でのエラー)
 
 ```ts
 exports.updateUser = functions.firestore.document('users/{userId}')
@@ -90,7 +95,7 @@ exports.updateUser = functions.firestore.document('users/{userId}')
 })
 ```
 
-結果はこのように取得できます。
+The result can be got as follows.
 
 ```ts
 admin.firestore().doc('user/1000').get().then(s => {
@@ -100,3 +105,9 @@ admin.firestore().doc('user/1000').get().then(s => {
   const error = user.response.error
 }
 ```
+
+## Advanced
+
+### Failure
+
+TODO
