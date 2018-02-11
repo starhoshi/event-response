@@ -1,8 +1,8 @@
 import * as FirebaseFirestore from '@google-cloud/firestore';
-export interface FailureOptions {
-    collectionPath: string;
-}
-export declare function initialize(adminOptions: any, failureOptions?: FailureOptions): void;
+export declare const initialize: (adminOptions: any) => void;
+export declare const configure: (options: {
+    collectionPath?: string | undefined;
+}) => void;
 export declare enum Status {
     OK = "OK",
     BadRequest = "BadRequest",
@@ -12,6 +12,14 @@ export interface IResponse {
     status: Status;
     id?: string;
     error?: any;
+}
+export interface IFailure {
+    errors: {
+        response: IResponse;
+        createdAt: FirebaseFirestore.FieldValue;
+    }[];
+    refPath: string;
+    createdAt: FirebaseFirestore.FieldValue;
 }
 export declare class Failure {
     reference: FirebaseFirestore.DocumentReference;

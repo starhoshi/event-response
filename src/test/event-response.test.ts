@@ -12,19 +12,85 @@ beforeAll(() => {
     {
       projectId: 'sandbox-329fc',
       keyFilename: './sandbox-329fc-firebase-adminsdk.json'
-    },
-    {
-      collectionPath: 'version/1/failure'
     }
   )
 })
 
+const errorID = 'id'
+const errorError = 'error'
+const collectionPath = 'version/1/failure'
 let user: FirebaseFirestore.DocumentReference
+
 beforeEach(async () => {
   user = await admin.firestore().collection('user').add({ name: 'test' })
 })
+beforeAll(async () => {
+  EventResponse.configure({ collectionPath: collectionPath })
+})
 
-const step = 'step'
+const expectOK = async (response: EventResponse.IResponse, ref: FirebaseFirestore.DocumentReference) => {
+  expect(response.status).toEqual(EventResponse.Status.OK)
+  expect(response.id).toBeUndefined()
+  expect(response.error).toBeUndefined()
+
+  const updatedUser = await admin.firestore().doc(ref.path).get().then(s => s.data())
+  expect(updatedUser!.response.status).toBe(EventResponse.Status.OK)
+  expect(updatedUser!.response.id).toBeUndefined()
+  expect(updatedUser!.response.error).toBeUndefined()
+}
+
+const expectError = async (status: EventResponse.Status, response: EventResponse.IResponse, ref: FirebaseFirestore.DocumentReference, id?: string, error?: any) => {
+  expect(response.status).toEqual(status)
+  expect(response.id).toBe(id)
+  expect(response.error).toBe(error)
+
+  const updatedUser = await admin.firestore().doc(ref.path).get().then(s => s.data())
+  expect(updatedUser!.response.status).toBe(status)
+  expect(updatedUser!.response.id).toBe(id)
+  expect(updatedUser!.response.error).toBe(error)
+}
+
+describe('setOK', async () => {
+  describe('id is undefined', () => {
+    test('response: ok', async () => {
+      const response = await new EventResponse.Response(user).setOK()
+      await expectOK(response, user)
+    })
+  })
+})
+
+describe('setInternalError', async () => {
+  describe('EventResponse.collectionPath exist', async () => {
+    test('set Internal Error and created Failure', async () => {
+      const response = await new EventResponse.Response(user).setInternalError(errorID, errorError)
+      await expectError(EventResponse.Status.InternalError, response, user, errorID, errorError)
+
+      const querySnapshot = await admin.firestore().collection(collectionPath).where('refPath', '==', user.path).get()
+      expect(querySnapshot.docs.length).toBe(1)
+      const failure = querySnapshot.docs[0].data() as EventResponse.IFailure
+      expect(failure.createdAt).toBeDefined()
+      expect(failure.refPath).toBe(user.path)
+      expect(failure.errors[0].createdAt).toBeDefined()
+      expect(failure.errors[0].response).toEqual(response)
+    })
+  })
+
+  describe('EventResponse.collectionPath does not exist', async () => {
+    beforeAll(() => {
+      EventResponse.configure({collectionPath: undefined})
+    })
+    afterAll(() => {
+      EventResponse.configure({collectionPath: collectionPath})
+    })
+
+    test('set Internal Error but not created Failure', async () => {
+      const response = await new EventResponse.Response(user).setInternalError(errorID, errorError)
+      await expectError(EventResponse.Status.InternalError, response, user, errorID, errorError)
+      const querySnapshot = await admin.firestore().collection(collectionPath).where('refPath', '==', user.path).get()
+      expect(querySnapshot.docs.length).toBe(0)
+    })
+  })
+})
 
 // describe('clearCompleted', () => {
 //   test('clear', async () => {
@@ -415,32 +481,6 @@ const step = 'step'
 //     })
 //   })
 // })
-
-describe('setOK', async () => {
-  describe('id is undefined', () => {
-    test('response: ok', async () => {
-      const response = await new EventResponse.Response(user).setOK()
-      expect(response.status).toEqual(EventResponse.Status.OK)
-
-      const updatedUser = await admin.firestore().doc(user.path).get().then(s => s.data())
-      expect(updatedUser!.response.status).toBe(EventResponse.Status.OK)
-      expect(updatedUser!.response.id).toBeUndefined()
-      expect(updatedUser!.response.errors).toBeUndefined()
-    })
-  })
-})
-
-describe('setFailure', async () => {
-    test('response: error and failure was set', async () => {
-      const response = await new EventResponse.Response(user).setInternalError('id', 'error')
-      expect(response.status).toEqual(EventResponse.Status.InternalError)
-
-      const updatedUser = await admin.firestore().doc(user.path).get().then(s => s.data())
-      expect(updatedUser!.response.status).toBe(EventResponse.Status.InternalError)
-      expect(updatedUser!.response.id).toBe('id')
-      expect(updatedUser!.response.error).toBe('error')
-    })
-})
 
 //   describe('failure not exists', () => {
 //     test('success', async () => {
