@@ -4,9 +4,9 @@ export interface FailureOptions {
 }
 export declare function initialize(adminOptions: any, failureOptions?: FailureOptions): void;
 export declare enum Status {
-    OK = 200,
-    BadRequest = 400,
-    InternalError = 500,
+    OK = "OK",
+    BadRequest = "BadRequest",
+    InternalError = "InternalError",
 }
 export interface IResponse {
     status: Status;

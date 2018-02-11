@@ -431,8 +431,7 @@ describe('setOK', async () => {
 })
 
 describe('setFailure', async () => {
-  describe('id is undefined', () => {
-    test('response: ok', async () => {
+    test('response: error and failure was set', async () => {
       const response = await new EventResponse.Response(user).setInternalError('id', 'error')
       expect(response.status).toEqual(EventResponse.Status.InternalError)
 
@@ -441,7 +440,6 @@ describe('setFailure', async () => {
       expect(updatedUser!.response.id).toBe('id')
       expect(updatedUser!.response.error).toBe('error')
     })
-  })
 })
 
 //   describe('failure not exists', () => {

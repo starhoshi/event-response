@@ -19,9 +19,9 @@ function initialize(adminOptions, failureOptions) {
 exports.initialize = initialize;
 var Status;
 (function (Status) {
-    Status[Status["OK"] = 200] = "OK";
-    Status[Status["BadRequest"] = 400] = "BadRequest";
-    Status[Status["InternalError"] = 500] = "InternalError";
+    Status["OK"] = "OK";
+    Status["BadRequest"] = "BadRequest";
+    Status["InternalError"] = "InternalError";
 })(Status = exports.Status || (exports.Status = {}));
 class Failure {
     makeQuerySnapshot(refPath) {

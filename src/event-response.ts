@@ -19,9 +19,9 @@ export function initialize(adminOptions: any, failureOptions?: FailureOptions) {
 }
 
 export enum Status {
-  OK = 200,
-  BadRequest = 400,
-  InternalError = 500
+  OK = 'OK',
+  BadRequest = 'BadRequest',
+  InternalError = 'InternalError'
 }
 
 export interface IResponse {
