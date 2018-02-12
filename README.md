@@ -85,14 +85,14 @@ You can set 3 pattens.
 exports.updateUser = functions.firestore.document('users/{userId}')
   .onCreate(async event => {
     if (!event.data.data().name) {
-      return new EventResponse.Result(user).setBadRequest('NameNotFound', 'User.name not found')
+      return new EventResponse.Result(event.data.ref).setBadRequest('NameNotFound', 'User.name not found')
     }
 
     try {
       await event.data.ref.update({name: 'new name'})
-      await new EventResponse.Result(order.reference).setOK()
+      await new EventResponse.Result(event.data.ref).setOK()
     } catch (error) {
-      await new EventResponse.Result(user).setInternalError('NameUpdateFailed', error.toString())
+      await new EventResponse.Result(event.data.ref).setInternalError('NameUpdateFailed', error.toString())
       return Promise.reject(error)
     }
 
