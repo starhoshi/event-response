@@ -102,17 +102,12 @@ describe('setOK', async () => {
  */
 describe('setBadRequest', async () => {
   describe('error is undefined', () => {
-    test('set Bad Request and created Failure', async () => {
+    test('set Bad Request and not created Failure', async () => {
       const result = await new EventResponse.Result(user).setBadRequest(errorID)
       await expectError(EventResponse.Status.BadRequest, result, user, errorID, undefined)
 
       const querySnapshot = await admin.firestore().collection(collectionPath).where('refPath', '==', user.path).get()
-      expect(querySnapshot.docs.length).toBe(1)
-      const failure = querySnapshot.docs[0].data() as EventResponse.IFailure
-      expect(failure.createdAt).toBeDefined()
-      expect(failure.refPath).toBe(user.path)
-      expect(failure.errors[0].createdAt).toBeDefined()
-      expect(failure.errors[0].result).toEqual(result)
+      expect(querySnapshot.docs.length).toBe(0)
     })
   })
 })

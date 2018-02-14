@@ -101,10 +101,17 @@ class Result {
             if (error) {
                 result.error = error;
             }
-            yield Promise.all([
-                this.reference.update({ result: result }),
-                new Failure(this.reference).add(result)
-            ]);
+            if (status === Status.BadRequest) {
+                yield Promise.all([
+                    this.reference.update({ result: result })
+                ]);
+            }
+            else {
+                yield Promise.all([
+                    this.reference.update({ result: result }),
+                    new Failure(this.reference).add(result)
+                ]);
+            }
             return result;
         });
     }

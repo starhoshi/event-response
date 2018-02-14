@@ -124,10 +124,16 @@ export class Result {
       result.error = error
     }
 
-    await Promise.all([
-      this.reference.update({ result: result }),
-      new Failure(this.reference).add(result)
-    ])
+    if (status === Status.BadRequest) {
+      await Promise.all([
+        this.reference.update({ result: result })
+      ])
+    } else {
+      await Promise.all([
+        this.reference.update({ result: result }),
+        new Failure(this.reference).add(result)
+      ])
+    }
 
     return result
   }
