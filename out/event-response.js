@@ -8,7 +8,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+// import * as functions from 'firebase-functions'
 const FirebaseFirestore = require("@google-cloud/firestore");
+// import { DeltaDocumentSnapshot } from 'firebase-functions/lib/providers/firestore'
 let _firestore;
 let collectionPath;
 exports.initialize = (adminOptions) => {

@@ -16,7 +16,7 @@ export interface IResult {
 export interface IFailure {
     errors: {
         result: IResult;
-        createdAt: FirebaseFirestore.FieldValue;
+        createdAt: Date;
     }[];
     refPath: string;
     createdAt: FirebaseFirestore.FieldValue;

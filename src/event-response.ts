@@ -1,6 +1,6 @@
-import * as functions from 'firebase-functions'
+// import * as functions from 'firebase-functions'
 import * as FirebaseFirestore from '@google-cloud/firestore'
-import { DeltaDocumentSnapshot } from 'firebase-functions/lib/providers/firestore'
+// import { DeltaDocumentSnapshot } from 'firebase-functions/lib/providers/firestore'
 
 let _firestore: FirebaseFirestore.Firestore
 let collectionPath: string | undefined
@@ -28,7 +28,7 @@ export interface IResult {
 export interface IFailure {
   errors: {
     result: IResult,
-    createdAt: FirebaseFirestore.FieldValue
+    createdAt: Date
   }[],
   refPath: string,
   // reference: FirebaseFirestore.DocumentReference,
@@ -65,7 +65,7 @@ export class Failure {
         createdAt: FirebaseFirestore.FieldValue.serverTimestamp(),
         // reference: this.reference,
         refPath: this.reference.path
-       }
+      }
       return failureRef.add(failure)
     } else {
       const failure = querySnapshot.docs[0].data() as IFailure
