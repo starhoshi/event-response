@@ -1,5 +1,5 @@
 import * as FirebaseFirestore from '@google-cloud/firestore';
-export declare const initialize: (adminOptions: any) => void;
+export declare const initialize: (firestore: FirebaseFirestore.Firestore) => void;
 export declare const configure: (options: {
     collectionPath?: string | undefined;
 }) => void;

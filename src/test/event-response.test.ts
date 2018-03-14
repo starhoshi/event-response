@@ -8,12 +8,7 @@ beforeAll(() => {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
   })
-  EventResponse.initialize(
-    {
-      projectId: 'sandbox-329fc',
-      keyFilename: './sandbox-329fc-firebase-adminsdk.json'
-    }
-  )
+  EventResponse.initialize(admin.firestore())
 })
 
 const errorID = 'id'
@@ -81,10 +76,10 @@ describe('setOK', async () => {
 
   describe('EventResponse.collectionPath is undefined', async () => {
     beforeAll(() => {
-      EventResponse.configure({collectionPath: undefined})
+      EventResponse.configure({ collectionPath: undefined })
     })
     afterAll(() => {
-      EventResponse.configure({collectionPath: collectionPath})
+      EventResponse.configure({ collectionPath: collectionPath })
     })
 
     test('failure is empty', async () => {
@@ -161,10 +156,10 @@ describe('setInternalError', async () => {
 
   describe('EventResponse.collectionPath does not exist', async () => {
     beforeAll(() => {
-      EventResponse.configure({collectionPath: undefined})
+      EventResponse.configure({ collectionPath: undefined })
     })
     afterAll(() => {
-      EventResponse.configure({collectionPath: collectionPath})
+      EventResponse.configure({ collectionPath: collectionPath })
     })
 
     test('set Internal Error but not created Failure', async () => {

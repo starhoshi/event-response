@@ -5,8 +5,8 @@ import * as FirebaseFirestore from '@google-cloud/firestore'
 let _firestore: FirebaseFirestore.Firestore
 let collectionPath: string | undefined
 
-export const initialize = (adminOptions: any) => {
-  _firestore = new FirebaseFirestore.Firestore(adminOptions)
+export const initialize = (firestore: FirebaseFirestore.Firestore) => {
+  _firestore = firestore
 }
 
 export const configure = (options: { collectionPath?: string }) => {

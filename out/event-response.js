@@ -13,8 +13,8 @@ const FirebaseFirestore = require("@google-cloud/firestore");
 // import { DeltaDocumentSnapshot } from 'firebase-functions/lib/providers/firestore'
 let _firestore;
 let collectionPath;
-exports.initialize = (adminOptions) => {
-    _firestore = new FirebaseFirestore.Firestore(adminOptions);
+exports.initialize = (firestore) => {
+    _firestore = firestore;
 };
 exports.configure = (options) => {
     collectionPath = options.collectionPath;
