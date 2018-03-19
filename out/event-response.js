@@ -22,38 +22,53 @@ class Result {
     constructor(reference) {
         this.reference = reference;
     }
-    makeResult(status) {
-        return { status: status };
-    }
-    setOK(id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const result = this.makeResult(Status.OK);
-            if (id) {
-                result.id = id;
-            }
-            yield this.reference.update({ result: result });
-            return result;
-        });
-    }
-    setError(status, id, message) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const result = this.makeResult(status);
+    makeResult(status, id, message) {
+        const result = { status: status };
+        if (id) {
             result.id = id;
-            if (message) {
-                result.message = message;
-            }
+        }
+        if (message) {
+            result.message = message;
+        }
+        return result;
+    }
+    updateWithBatch(status, batch, id, message) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = this.makeResult(status, id, message);
+            batch.update(this.reference, result);
+            return result;
+        });
+    }
+    update(status, id, message) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = this.makeResult(status, id, message);
             yield this.reference.update({ result: result });
             return result;
         });
     }
-    setBadRequest(id, message) {
+    updateOrBatch(status, batch, id, message) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.setError(Status.BadRequest, id, message);
+            if (batch) {
+                return this.updateWithBatch(status, batch, id, message);
+            }
+            else {
+                return this.update(status, id, message);
+            }
         });
     }
-    setInternalError(id, message) {
+    setOK(id, message, batch) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.setError(Status.InternalError, id, message);
+            return this.updateOrBatch(Status.OK, batch, id, message);
+        });
+    }
+    setBadRequest(id, message, batch) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.updateOrBatch(Status.BadRequest, batch, id, message);
+        });
+    }
+    setInternalError(id, message, batch) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.updateOrBatch(Status.InternalError, batch, id, message);
         });
     }
 }

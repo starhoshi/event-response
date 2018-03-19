@@ -13,9 +13,11 @@ export interface IResult {
 export declare class Result {
     reference: FirebaseFirestore.DocumentReference;
     constructor(reference: FirebaseFirestore.DocumentReference);
-    private makeResult(status);
+    private makeResult(status, id?, message?);
+    private updateWithBatch(status, batch, id?, message?);
+    private update(status, id?, message?);
+    private updateOrBatch(status, batch?, id?, message?);
     setOK(id?: string): Promise<IResult>;
-    private setError(status, id, message?);
     setBadRequest(id: string, message?: string): Promise<IResult>;
     setInternalError(id: string, message?: string): Promise<IResult>;
 }
