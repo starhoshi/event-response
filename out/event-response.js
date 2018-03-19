@@ -33,11 +33,9 @@ class Result {
         return result;
     }
     updateWithBatch(status, batch, id, message) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const result = this.makeResult(status, id, message);
-            batch.update(this.reference, result);
-            return result;
-        });
+        const result = this.makeResult(status, id, message);
+        batch.update(this.reference, { result: result });
+        return result;
     }
     update(status, id, message) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -46,30 +44,23 @@ class Result {
             return result;
         });
     }
-    updateOrBatch(status, batch, id, message) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (batch) {
-                return this.updateWithBatch(status, batch, id, message);
-            }
-            else {
-                return this.update(status, id, message);
-            }
-        });
+    setOK(id) {
+        return this.update(Status.OK, id);
     }
-    setOK(id, message, batch) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.updateOrBatch(Status.OK, batch, id, message);
-        });
+    setOKWithBatch(batch, id) {
+        return this.updateWithBatch(Status.OK, batch, id);
     }
-    setBadRequest(id, message, batch) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.updateOrBatch(Status.BadRequest, batch, id, message);
-        });
+    setBadRequest(id, message) {
+        return this.update(Status.BadRequest, id, message);
     }
-    setInternalError(id, message, batch) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.updateOrBatch(Status.InternalError, batch, id, message);
-        });
+    setBadRequestWithBatch(batch, id, message) {
+        return this.updateWithBatch(Status.BadRequest, batch, id, message);
+    }
+    setInternalError(id, message) {
+        return this.update(Status.InternalError, id, message);
+    }
+    setInternalErrorWithBatch(batch, id, message) {
+        return this.updateWithBatch(Status.InternalError, batch, id, message);
     }
 }
 exports.Result = Result;

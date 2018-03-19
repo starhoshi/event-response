@@ -37,9 +37,9 @@ export class Result {
     return result
   }
 
-  private async updateWithBatch(status: Status, batch: FirebaseFirestore.WriteBatch, id?: string, message?: string) {
+  private updateWithBatch(status: Status, batch: FirebaseFirestore.WriteBatch, id?: string, message?: string) {
     const result = this.makeResult(status, id, message)
-    batch.update(this.reference, result)
+    batch.update(this.reference, { result: result })
     return result
   }
 
@@ -49,26 +49,27 @@ export class Result {
     return result
   }
 
-  private async updateOrBatch(status: Status, batch?: FirebaseFirestore.WriteBatch, id?: string, message?: string) {
-    if (batch) {
-      return this.updateWithBatch(status, batch, id, message)
-    } else {
-      return this.update(status, id, message)
-    }
+  setOK(id?: string) {
+    return this.update(Status.OK, id)
   }
 
-  async setOK(id?: string): Promise<IResult>
-  async setOK(id: string, message?: string, batch?: FirebaseFirestore.WriteBatch): Promise<IResult> {
-    return this.updateOrBatch(Status.OK, batch, id, message)
+  setOKWithBatch(batch: FirebaseFirestore.WriteBatch, id?: string) {
+    return this.updateWithBatch(Status.OK, batch, id)
   }
 
-  async setBadRequest(id: string, message?: string): Promise<IResult>
-  async setBadRequest(id: string, message?: string, batch?: FirebaseFirestore.WriteBatch): Promise<IResult> {
-    return this.updateOrBatch(Status.BadRequest, batch, id, message)
+  setBadRequest(id: string, message?: string) {
+    return this.update(Status.BadRequest, id, message)
   }
 
-  async setInternalError(id: string, message?: string): Promise<IResult>
-  async setInternalError(id: string, message?: string, batch?: FirebaseFirestore.WriteBatch): Promise<IResult> {
-    return this.updateOrBatch(Status.InternalError, batch, id, message)
+  setBadRequestWithBatch(batch: FirebaseFirestore.WriteBatch, id: string, message?: string) {
+    return this.updateWithBatch(Status.BadRequest, batch, id, message)
+  }
+
+  setInternalError(id: string, message?: string) {
+    return this.update(Status.InternalError, id, message)
+  }
+
+  setInternalErrorWithBatch(batch: FirebaseFirestore.WriteBatch, id: string, message?: string) {
+    return this.updateWithBatch(Status.InternalError, batch, id, message)
   }
 }

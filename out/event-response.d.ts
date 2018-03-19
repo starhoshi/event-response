@@ -16,8 +16,10 @@ export declare class Result {
     private makeResult(status, id?, message?);
     private updateWithBatch(status, batch, id?, message?);
     private update(status, id?, message?);
-    private updateOrBatch(status, batch?, id?, message?);
     setOK(id?: string): Promise<IResult>;
+    setOKWithBatch(batch: FirebaseFirestore.WriteBatch, id?: string): IResult;
     setBadRequest(id: string, message?: string): Promise<IResult>;
+    setBadRequestWithBatch(batch: FirebaseFirestore.WriteBatch, id: string, message?: string): IResult;
     setInternalError(id: string, message?: string): Promise<IResult>;
+    setInternalErrorWithBatch(batch: FirebaseFirestore.WriteBatch, id: string, message?: string): IResult;
 }

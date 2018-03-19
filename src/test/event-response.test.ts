@@ -56,16 +56,30 @@ describe('setOK', async () => {
       await expectOK(result, user, 'success')
     })
   })
+
+  describe('use write batch', () => {
+    test('result: ok and id is set', async () => {
+      const batch = admin.firestore().batch()
+      const result = new EventResponse.Result(user).setOKWithBatch(batch, 'success')
+      await batch.commit()
+      await expectOK(result, user, 'success')
+    })
+  })
 })
 
-/**
- * Bad Request and Internal Error use same internal function.
- * Because setBadRequest test is small.
- */
 describe('setBadRequest', async () => {
   describe('error is undefined', () => {
     test('set Bad Request', async () => {
       const result = await new EventResponse.Result(user).setBadRequest(errorID)
+      await expectError(EventResponse.Status.BadRequest, result, user, errorID, undefined)
+    })
+  })
+
+  describe('use write batch', () => {
+    test('set Bad Request', async () => {
+      const batch = admin.firestore().batch()
+      const result = new EventResponse.Result(user).setBadRequestWithBatch(batch, errorID, undefined)
+      await batch.commit()
       await expectError(EventResponse.Status.BadRequest, result, user, errorID, undefined)
     })
   })
@@ -82,5 +96,14 @@ describe('setInternalError', async () => {
   test('set Internal Error', async () => {
     const result = await new EventResponse.Result(user).setInternalError(errorID, errorError)
     await expectError(EventResponse.Status.InternalError, result, user, errorID, errorError)
+  })
+
+  describe('use write batch', () => {
+    test('set Internal Error', async () => {
+      const batch = admin.firestore().batch()
+      const result = new EventResponse.Result(user).setInternalErrorWithBatch(batch, errorID, errorError)
+      await batch.commit()
+      await expectError(EventResponse.Status.InternalError, result, user, errorID, errorError)
+    })
   })
 })
