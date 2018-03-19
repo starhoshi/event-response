@@ -15,7 +15,7 @@ export enum Status {
 export interface IResult {
   status: Status
   id?: string
-  error?: any
+  message?: string
 }
 
 export class Result {
@@ -40,11 +40,11 @@ export class Result {
     return result
   }
 
-  private async setError(status: Status, id: string, error?: any) {
+  private async setError(status: Status, id: string, message?: string) {
     const result = this.makeResult(status)
     result.id = id
-    if (error) {
-      result.error = error
+    if (message) {
+      result.message = message
     }
 
     await this.reference.update({ result: result })
@@ -52,11 +52,11 @@ export class Result {
     return result
   }
 
-  async setBadRequest(id: string, error?: any) {
-    return this.setError(Status.BadRequest, id, error)
+  async setBadRequest(id: string, message?: string) {
+    return this.setError(Status.BadRequest, id, message)
   }
 
-  async setInternalError(id: string, error?: any) {
-    return this.setError(Status.InternalError, id, error)
+  async setInternalError(id: string, message?: string) {
+    return this.setError(Status.InternalError, id, message)
   }
 }

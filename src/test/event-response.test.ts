@@ -23,23 +23,23 @@ beforeEach(async () => {
 const expectOK = async (result: EventResponse.IResult, ref: FirebaseFirestore.DocumentReference, id?: string) => {
   expect(result.status).toEqual(EventResponse.Status.OK)
   expect(result.id).toBe(id)
-  expect(result.error).toBeUndefined()
+  expect(result.message).toBeUndefined()
 
-  const updatedUser = await admin.firestore().doc(ref.path).get().then(s => s.data())
-  expect(updatedUser!.result.status).toBe(EventResponse.Status.OK)
-  expect(updatedUser!.result.id).toBe(id)
-  expect(updatedUser!.result.error).toBeUndefined()
+  const updatedUser = await admin.firestore().doc(ref.path).get().then(s => s.data()!.result) as EventResponse.IResult
+  expect(updatedUser.status).toBe(EventResponse.Status.OK)
+  expect(updatedUser.id).toBe(id)
+  expect(updatedUser.message).toBeUndefined()
 }
 
-const expectError = async (status: EventResponse.Status, result: EventResponse.IResult, ref: FirebaseFirestore.DocumentReference, id?: string, error?: any) => {
+const expectError = async (status: EventResponse.Status, result: EventResponse.IResult, ref: FirebaseFirestore.DocumentReference, id?: string, error?: string) => {
   expect(result.status).toEqual(status)
   expect(result.id).toBe(id)
-  expect(result.error).toBe(error)
+  expect(result.message).toBe(error)
 
-  const updatedUser = await admin.firestore().doc(ref.path).get().then(s => s.data())
-  expect(updatedUser!.result.status).toBe(status)
-  expect(updatedUser!.result.id).toBe(id)
-  expect(updatedUser!.result.error).toBe(error)
+  const updatedUser = await admin.firestore().doc(ref.path).get().then(s => s.data()!.result) as EventResponse.IResult
+  expect(updatedUser.status).toBe(status)
+  expect(updatedUser.id).toBe(id)
+  expect(updatedUser.message).toBe(error)
 }
 
 describe('setOK', async () => {
@@ -67,9 +67,6 @@ describe('setBadRequest', async () => {
     test('set Bad Request', async () => {
       const result = await new EventResponse.Result(user).setBadRequest(errorID)
       await expectError(EventResponse.Status.BadRequest, result, user, errorID, undefined)
-
-      const querySnapshot = await admin.firestore().collection(collectionPath).where('refPath', '==', user.path).get()
-      expect(querySnapshot.docs.length).toBe(0)
     })
   })
 })

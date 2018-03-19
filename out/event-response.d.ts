@@ -8,14 +8,14 @@ export declare enum Status {
 export interface IResult {
     status: Status;
     id?: string;
-    error?: any;
+    message?: string;
 }
 export declare class Result {
     reference: FirebaseFirestore.DocumentReference;
     constructor(reference: FirebaseFirestore.DocumentReference);
     private makeResult(status);
     setOK(id?: string): Promise<IResult>;
-    private setError(status, id, error?);
-    setBadRequest(id: string, error?: any): Promise<IResult>;
-    setInternalError(id: string, error?: any): Promise<IResult>;
+    private setError(status, id, message?);
+    setBadRequest(id: string, message?: string): Promise<IResult>;
+    setInternalError(id: string, message?: string): Promise<IResult>;
 }

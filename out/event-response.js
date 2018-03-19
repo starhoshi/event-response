@@ -35,25 +35,25 @@ class Result {
             return result;
         });
     }
-    setError(status, id, error) {
+    setError(status, id, message) {
         return __awaiter(this, void 0, void 0, function* () {
             const result = this.makeResult(status);
             result.id = id;
-            if (error) {
-                result.error = error;
+            if (message) {
+                result.message = message;
             }
             yield this.reference.update({ result: result });
             return result;
         });
     }
-    setBadRequest(id, error) {
+    setBadRequest(id, message) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.setError(Status.BadRequest, id, error);
+            return this.setError(Status.BadRequest, id, message);
         });
     }
-    setInternalError(id, error) {
+    setInternalError(id, message) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.setError(Status.InternalError, id, error);
+            return this.setError(Status.InternalError, id, message);
         });
     }
 }
