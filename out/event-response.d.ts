@@ -1,8 +1,5 @@
 import * as FirebaseFirestore from '@google-cloud/firestore';
 export declare const initialize: (firestore: FirebaseFirestore.Firestore) => void;
-export declare const configure: (options: {
-    collectionPath?: string | undefined;
-}) => void;
 export declare enum Status {
     OK = "OK",
     BadRequest = "BadRequest",
@@ -12,22 +9,6 @@ export interface IResult {
     status: Status;
     id?: string;
     error?: any;
-}
-export interface IFailure {
-    errors: {
-        result: IResult;
-        createdAt: Date;
-    }[];
-    refPath: string;
-    createdAt: FirebaseFirestore.FieldValue;
-}
-export declare class Failure {
-    reference: FirebaseFirestore.DocumentReference;
-    private makeQuerySnapshot(refPath);
-    private makeError(result);
-    add(result: IResult): Promise<FirebaseFirestore.DocumentReference | FirebaseFirestore.WriteResult | undefined>;
-    clear(): Promise<FirebaseFirestore.WriteResult[] | undefined>;
-    constructor(reference: FirebaseFirestore.DocumentReference);
 }
 export declare class Result {
     reference: FirebaseFirestore.DocumentReference;
