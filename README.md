@@ -28,7 +28,7 @@ When Cloud Functions completes successfully, call `setOK()`.
 It is 200 in http.
 
 ```ts
-new EventResponse.Result(user).setOK()
+new EventResponse.Result(user, 'prefix').setOK()
 ```
 
 <img src="https://raw.githubusercontent.com/starhoshi/event-response/master/docs/ok.png" width='70%' />
@@ -40,7 +40,7 @@ When Cloud Functions fails on client side problems such as invalid parameters, c
 It is 400 in http.
 
 ```ts
-new EventResponse.Result(user).setBadRequest('error_id', 'error reason')
+new EventResponse.Result(user, 'prefix').setBadRequest('error_id', 'error reason')
 ```
 
 <img src="https://raw.githubusercontent.com/starhoshi/event-response/master/docs/badrequest.png" width='70%' />
@@ -52,7 +52,7 @@ If an error occurs on the server side, call `setInternalError`. And you can set 
 It is 500 in http.
 
 ```ts
-new EventResponse.Result(user).setInternalError('error_id', 'error reason')
+new EventResponse.Result(user, 'prefix').setInternalError('error_id', 'error reason')
 ```
 
 <img src="https://raw.githubusercontent.com/starhoshi/event-response/master/docs/internal.png" width='70%' />
@@ -85,14 +85,14 @@ You can set 3 pattens.
 exports.updateUser = functions.firestore.document('users/{userId}')
   .onCreate(async event => {
     if (!event.data.data().name) {
-      return new EventResponse.Result(event.data.ref).setBadRequest('NameNotFound', 'User.name not found')
+      return new EventResponse.Result(event.data.ref, 'updateUser').setBadRequest('NameNotFound', 'User.name not found')
     }
 
     try {
       await event.data.ref.update({name: 'new name'})
-      await new EventResponse.Result(event.data.ref).setOK()
+      await new EventResponse.Result(event.data.ref, 'updateUser').setOK()
     } catch (error) {
-      await new EventResponse.Result(event.data.ref).setInternalError('NameUpdateFailed', error.toString())
+      await new EventResponse.Result(event.data.ref, 'updateUser').setInternalError('NameUpdateFailed', error.toString())
       return Promise.reject(error)
     }
 
@@ -105,9 +105,9 @@ The result can be got as follows.
 ```ts
 admin.firestore().doc('user/1000').get().then(s => {
   const user = s.data())
-  const status = user.result.status
-  const id = user.result.id
-  const error = user.result.error
+  const status = user.updateUserResult.status
+  const id = user.updateUserResult.id
+  const error = user.updateUserResult.error
 }
 ```
 
