@@ -20,9 +20,11 @@ export interface IResult {
 
 export class Result {
   reference: FirebaseFirestore.DocumentReference
+  parameterPrefix: string
 
-  constructor(reference: FirebaseFirestore.DocumentReference) {
+  constructor(reference: FirebaseFirestore.DocumentReference, parameterPrefix: string) {
     this.reference = reference
+    this.parameterPrefix = parameterPrefix
   }
 
   private makeResult(status: Status, id?: string, message?: string): IResult {
@@ -37,15 +39,19 @@ export class Result {
     return result
   }
 
+  private get key() {
+    return `${this.parameterPrefix}Result`
+  }
+
   private updateWithBatch(status: Status, batch: FirebaseFirestore.WriteBatch, id?: string, message?: string) {
     const result = this.makeResult(status, id, message)
-    batch.update(this.reference, { result: result })
+    batch.update(this.reference, { [this.key]: result })
     return result
   }
 
   private async update(status: Status, id?: string, message?: string) {
     const result = this.makeResult(status, id, message)
-    await this.reference.update({ result: result })
+    await this.reference.update({ [this.key]: result })
     return result
   }
 

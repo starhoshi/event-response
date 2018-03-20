@@ -19,8 +19,9 @@ var Status;
     Status["InternalError"] = "InternalError";
 })(Status = exports.Status || (exports.Status = {}));
 class Result {
-    constructor(reference) {
+    constructor(reference, parameterPrefix) {
         this.reference = reference;
+        this.parameterPrefix = parameterPrefix;
     }
     makeResult(status, id, message) {
         const result = { status: status };
@@ -32,15 +33,18 @@ class Result {
         }
         return result;
     }
+    get key() {
+        return `${this.parameterPrefix}Result`;
+    }
     updateWithBatch(status, batch, id, message) {
         const result = this.makeResult(status, id, message);
-        batch.update(this.reference, { result: result });
+        batch.update(this.reference, { [this.key]: result });
         return result;
     }
     update(status, id, message) {
         return __awaiter(this, void 0, void 0, function* () {
             const result = this.makeResult(status, id, message);
-            yield this.reference.update({ result: result });
+            yield this.reference.update({ [this.key]: result });
             return result;
         });
     }
